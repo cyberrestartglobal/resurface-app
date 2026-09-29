@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReSurface — Request a Scan | CyberRestart</title>
+<meta name="description" content="Request a ReSurface external attack surface scan from CyberRestart.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #09090f;
+    --surface: #0d0d14;
+    --border: #1e1e2e;
+    --cyan: #06b6d4;
+    --cyan-hover: #0891b2;
+    --purple: #8b5cf6;
+    --text: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #475569;
+    --input-border: #2e3a4e;
+    --error: #ef4444;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  a { color: inherit; }
+
+  /* ── Header ─────────────────────────────── */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    padding: 0 24px;
+    background: rgba(9, 9, 15, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    color: var(--text);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+  .back-link {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--text-secondary); }
+
+  /* ── Hero ───────────────────────────────── */
+  .hero {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle, #1e2d3d 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 30% 40% 30%;
+    align-items: center;
+    width: 100%;
+    max-width: 1280px;
+  }
+  .illustration {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .illustration svg { width: 100%; height: 500px; }
+  .illustration.mirrored svg { transform: scaleX(-1); }
+  .card-col { display: flex; justify-content: center; }
+
+  /* Network illustration */
+  .net-link {
+    stroke: #1e2d3d;
+    stroke-width: 1;
+    fill: none;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .net-main { stroke-width: 1.5; }
+  .net-node { fill: var(--cyan); opacity: 0.6; }
+  .net-outline { fill: none; stroke: var(--cyan); stroke-width: 1.5; opacity: 0.6; }
+  .net-arrow { fill: var(--cyan); opacity: 0.6; }
+  .d1 { animation-delay: 0.5s; }
+  .d2 { animation-delay: 1s; }
+  .d3 { animation-delay: 1.5s; }
+  .d4 { animation-delay: 2s; }
+  .d5 { animation-delay: 2.5s; }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+
+  /* ── Card ───────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 0 80px rgba(6, 182, 212, 0.06);
+    max-width: 480px;
+    width: 100%;
+  }
+
+  /* Step indicator */
+  .steps {
+    display: flex;
+    align-items: flex-start;
+    list-style: none;
+    margin: 0 0 32px;
+    padding: 0;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+  .step-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--border);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
+  }
+  .step-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    transition: color 0.3s;
+  }
+  .step.active .step-dot {
+    background: transparent;
+    border-color: var(--cyan);
+    color: var(--text);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.12);
+  }
+  .step.active .step-label { color: var(--text); }
+  .step.complete .step-dot {
+    background: var(--cyan);
+    border-color: var(--cyan);
+    color: #fff;
+  }
+  .step.complete .step-label { color: var(--text-secondary); }
+  .step-line {
+    flex: 1 1 auto;
+    height: 1px;
+    margin-top: 12px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .step-line.complete { background: var(--cyan); }
+
+  /* Panels */
+  .panel { display: none; flex-direction: column; }
+  .panel.active { display: flex; }
+
+  .eyebrow {
+    color: var(--cyan);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+  .panel h1, .panel h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 8px;
+    line-height: 1.3;
+  }
+  .panel h2.accent { color: var(--cyan); }
+  .subtext {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+  .mono { font-family: var(--mono); }
+  .cyan { color: var(--cyan); }
+
+  /* Inputs */
+  .field {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .field::placeholder { color: var(--text-muted); }
+  .field:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08);
+  }
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .chip {
+    background: #1a1a2e;
+    color: #64748b;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .chip:hover { color: var(--text-secondary); border-color: var(--input-border); }
+
+  /* Buttons */
+  .btn {
+    width: 100%;
+    margin-top: 24px;
+    background: var(--cyan);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn:hover:not(:disabled) { background: var(--cyan-hover); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn:focus-visible, .chip:focus-visible, .btn-ghost:focus-visible, .link-btn:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+  }
+  .btn-row { display: flex; gap: 10px; margin-top: 14px; }
+  .btn-row .btn { margin-top: 0; padding: 10px 14px; font-size: 0.875rem; }
+  .btn-row .btn:first-child { flex: 1 1 auto; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--text-muted); color: var(--text); }
+  .btn-outline {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+    margin-top: 12px;
+    background: transparent;
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+  .btn-outline:hover { background: rgba(6, 182, 212, 0.08); }
+
+  /* Resolve result */
+  #resolve-result { display: none; margin-top: 16px; }
+  #resolve-result.show { display: block; }
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex: 0 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .resolved-box {
+    background: rgba(6, 182, 212, 0.05);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .resolved-label { color: var(--cyan); font-size: 12px; margin: 0 0 6px; }
+  .resolved-domain {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    color: var(--cyan);
+    margin: 0;
+    word-break: break-all;
+  }
+
+  .error {
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .error[hidden] { display: none; }
+
+  /* Checkbox */
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 18px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    cursor: pointer;
+  }
+  .check-row input {
+    margin: 3px 0 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--cyan);
+    flex: 0 0 auto;
+    cursor: pointer;
+  }
+  .check-row .mono { word-break: break-all; }
+
+  /* OTP */
+  .otp-row { display: flex; gap: 8px; justify-content: center; }
+  .otp-box {
+    width: 48px;
+    height: 56px;
+    background: var(--bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    color: var(--cyan);
+    outline: none;
+    padding: 0;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .otp-box:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08);
+  }
+  .otp-row.shake { animation: shake 0.35s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  #otp-error { text-align: center; }
+
+  #resend-section {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--cyan);
+    font: inherit;
+    cursor: pointer;
+  }
+  .link-btn:hover { text-decoration: underline; }
+  .link-btn:disabled { opacity: 0.5; cursor: not-allowed; text-decoration: none; }
+
+  /* Step 4 */
+  .confirm { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .confirm-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(6, 182, 212, 0.08);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    margin-bottom: 20px;
+  }
+  .confirm-icon svg { width: 26px; height: 26px; }
+  .confirm .subtext { margin-bottom: 16px; }
+  .status-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    animation: status-pulse 2s ease-in-out infinite;
+  }
+  @keyframes status-pulse {
+    0%, 100% { opacity: 0.35; box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
+    50% { opacity: 1; box-shadow: 0 0 0 5px rgba(6, 182, 212, 0); }
+  }
+
+  .ref-card {
+    background: rgba(6, 182, 212, 0.04);
+    border: 1px solid rgba(6, 182, 212, 0.15);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 24px;
+  }
+  .ref-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    font-variant: small-caps;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+  .ref-value {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--cyan);
+    margin: 0 0 12px;
+  }
+  .ref-meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 4px 0 0;
+    word-break: break-all;
+  }
+  .cta-text {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-align: center;
+    margin: 28px 0 0;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ── Responsive ─────────────────────────── */
+  @media (max-width: 960px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .illustration { display: none; }
+  }
+  @media (max-width: 520px) {
+    .site-header { padding: 0 16px; }
+    .hero { padding: 24px 16px; align-items: flex-start; }
+    .card { padding: 28px 20px; }
+    .otp-row { gap: 6px; }
+    .otp-box { width: 42px; height: 52px; }
+    .back-link .long { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .net-link, .spinner, .status-dot, .otp-row.shake { animation: none; }
+    .status-dot { opacity: 1; }
+    .net-link { opacity: 0.55; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" href="https://cyberrestart.com">CyberRestart</a>
+  <a class="back-link" href="https://cyberrestart.com">← Back<span class="long"> to cyberrestart.com</span></a>
+</header>
+
+<main class="hero">
+  <div class="hero-grid">
+
+    <!-- Left illustration: attack-surface network converging on the card -->
+    <div class="illustration" id="illustration-left" aria-hidden="true">
+      <svg viewBox="0 0 300 500" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <polygon id="net-hex" points="9,0 4.5,7.8 -4.5,7.8 -9,0 -4.5,-7.8 4.5,-7.8"/>
+          <g id="net-person">
+            <circle cx="0" cy="-8" r="5"/>
+            <path d="M-9,10 Q-9,-1 0,-1 Q9,-1 9,10 Z"/>
+          </g>
+          <marker id="net-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="net-arrow" d="M0,0 L10,5 L0,10 Z"/>
+          </marker>
+        </defs>
+
+        <!-- subdomains → APIs -->
+        <line class="net-link" x1="30" y1="60" x2="120" y2="90"/>
+        <line class="net-link d1" x1="60" y1="140" x2="120" y2="90"/>
+        <line class="net-link d2" x1="60" y1="140" x2="110" y2="200"/>
+        <line class="net-link d3" x1="25" y1="220" x2="110" y2="200"/>
+        <line class="net-link d4" x1="55" y1="300" x2="125" y2="320"/>
+        <line class="net-link d5" x1="30" y1="380" x2="125" y2="320"/>
+        <line class="net-link d1" x1="30" y1="380" x2="115" y2="420"/>
+        <line class="net-link d3" x1="70" y1="450" x2="115" y2="420"/>
+
+        <!-- APIs → cloud hosts / executives -->
+        <line class="net-link d2" x1="120" y1="90" x2="190" y2="130"/>
+        <line class="net-link d4" x1="120" y1="90" x2="240" y2="70"/>
+        <line class="net-link d1" x1="110" y1="200" x2="190" y2="130"/>
+        <line class="net-link d5" x1="110" y1="200" x2="180" y2="260"/>
+        <line class="net-link d3" x1="125" y1="320" x2="180" y2="260"/>
+        <line class="net-link" x1="125" y1="320" x2="195" y2="380"/>
+        <line class="net-link d2" x1="115" y1="420" x2="195" y2="380"/>
+        <line class="net-link d4" x1="115" y1="420" x2="235" y2="440"/>
+        <line class="net-link d1" x1="180" y1="260" x2="230" y2="250"/>
+
+        <!-- main lines → card -->
+        <line class="net-link net-main" x1="240" y1="70" x2="292" y2="215" marker-end="url(#net-arrowhead)"/>
+        <line class="net-link net-main d1" x1="190" y1="130" x2="292" y2="235" marker-end="url(#net-arrowhead)"/>
+        <line class="net-link net-main d2" x1="238" y1="250" x2="292" y2="250" marker-end="url(#net-arrowhead)"/>
+        <line class="net-link net-main d3" x1="195" y1="380" x2="292" y2="265" marker-end="url(#net-arrowhead)"/>
+        <line class="net-link net-main d4" x1="235" y1="440" x2="292" y2="285" marker-end="url(#net-arrowhead)"/>
+
+        <!-- subdomains (6 circles) -->
+        <circle class="net-node" cx="30" cy="60" r="5"/>
+        <circle class="net-node" cx="60" cy="140" r="5"/>
+        <circle class="net-node" cx="25" cy="220" r="5"/>
+        <circle class="net-node" cx="55" cy="300" r="5"/>
+        <circle class="net-node" cx="30" cy="380" r="5"/>
+        <circle class="net-node" cx="70" cy="450" r="5"/>
+
+        <!-- APIs (4 hexagons) -->
+        <use class="net-node" href="#net-hex" x="120" y="90"/>
+        <use class="net-node" href="#net-hex" x="110" y="200"/>
+        <use class="net-node" href="#net-hex" x="125" y="320"/>
+        <use class="net-node" href="#net-hex" x="115" y="420"/>
+
+        <!-- cloud hosts (3 squares) -->
+        <rect class="net-node" x="183" y="123" width="14" height="14" rx="2"/>
+        <rect class="net-node" x="173" y="253" width="14" height="14" rx="2"/>
+        <rect class="net-node" x="188" y="373" width="14" height="14" rx="2"/>
+
+        <!-- executives (2 people) -->
+        <use class="net-node" href="#net-person" x="240" y="70"/>
+        <use class="net-node" href="#net-person" x="235" y="440"/>
+
+        <!-- mobile app (phone outline) -->
+        <rect class="net-outline" x="222" y="237" width="16" height="26" rx="3"/>
+        <line class="net-outline" x1="228" y1="258" x2="232" y2="258"/>
+      </svg>
+    </div>
+
+    <div class="card-col">
+      <div class="card">
+
+        <ol class="steps" id="step-indicator" aria-label="Progress">
+          <li class="step active" data-step="1"><span class="step-dot">1</span><span class="step-label">Target</span></li>
+          <li class="step-line" data-line="1" aria-hidden="true"></li>
+          <li class="step" data-step="2"><span class="step-dot">2</span><span class="step-label">Email</span></li>
+          <li class="step-line" data-line="2" aria-hidden="true"></li>
+          <li class="step" data-step="3"><span class="step-dot">3</span><span class="step-label">Verify</span></li>
+          <li class="step-line" data-line="3" aria-hidden="true"></li>
+          <li class="step" data-step="4"><span class="step-dot">4</span><span class="step-label">Done</span></li>
+        </ol>
+
+        <!-- STEP 1 — TARGET -->
+        <section class="panel active" id="panel-1" data-panel="1">
+          <p class="eyebrow">RESURFACE</p>
+          <h1>What do you want to scan?</h1>
+          <p class="subtext">Enter a domain or describe the organisation.</p>
+
+          <label for="target-input" class="sr-only">Domain or organisation name</label>
+          <input class="field" id="target-input" type="text" autocomplete="off" autocapitalize="off"
+                 spellcheck="false" maxlength="200" placeholder="domain.com or Organisation name">
+
+          <div class="chips" aria-label="Examples">
+            <button type="button" class="chip">gtbank.com</button>
+            <button type="button" class="chip">MTN Nigeria</button>
+            <button type="button" class="chip">Shell Nigeria</button>
+          </div>
+
+          <button type="button" class="btn" id="step1-btn">Continue →</button>
+
+          <div id="resolve-result" aria-live="polite"></div>
+        </section>
+
+        <!-- STEP 2 — EMAIL -->
+        <section class="panel" id="panel-2" data-panel="2">
+          <h2>Where should we send results?</h2>
+          <p class="subtext">Enter your work email. We'll verify it with a one-time code.</p>
+
+          <label for="email-input" class="sr-only">Work email</label>
+          <input class="field" id="email-input" type="email" autocomplete="email"
+                 placeholder="you@yourcompany.com">
+
+          <label class="check-row" for="auth-checkbox">
+            <input type="checkbox" id="auth-checkbox" required>
+            <span>I confirm I am authorised to request a scan of <span class="mono cyan" id="auth-domain"></span></span>
+          </label>
+
+          <div class="error" id="email-error" role="alert" hidden></div>
+
+          <button type="button" class="btn" id="step2-btn">Send verification code →</button>
+        </section>
+
+        <!-- STEP 3 — VERIFY -->
+        <section class="panel" id="panel-3" data-panel="3">
+          <h2>Check your inbox</h2>
+          <p class="subtext">We sent a 6-digit code to <span class="mono cyan" id="otp-email"></span>. Enter it below.</p>
+
+          <div class="otp-row" id="otp-row" role="group" aria-label="6-digit verification code">
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 2">
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 3">
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 4">
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 5">
+            <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 6">
+          </div>
+
+          <div class="error" id="otp-error" role="alert" hidden></div>
+
+          <button type="button" class="btn" id="step3-btn">Verify &amp; start scan →</button>
+
+          <div id="resend-section" aria-live="polite"></div>
+        </section>
+
+        <!-- STEP 4 — CONFIRMED -->
+        <section class="panel" id="panel-4" data-panel="4">
+          <div class="confirm">
+            <div class="confirm-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+            </div>
+            <h2>Request received</h2>
+            <p class="subtext">Your scan of <span class="mono cyan" id="done-domain-2"></span> is queued. We'll email the findings to <span class="mono cyan" id="done-email"></span> within 24 hours.</p>
+            <p class="status-line" role="status"><span class="status-dot" aria-hidden="true"></span>Queued</p>
+          </div>
+
+          <div class="ref-card">
+            <p class="ref-label">SCAN REFERENCE</p>
+            <p class="ref-value" id="ref-value"></p>
+            <p class="ref-meta">Target: <span class="mono" id="done-domain"></span></p>
+            <p class="ref-meta">Results to: <span class="mono" id="done-email-2"></span></p>
+          </div>
+
+          <p class="cta-text">While you wait — book a call with a lead consultant</p>
+          <a class="btn-outline" href="mailto:engage@cyberrestart.com">Book a call</a>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Right illustration: mirror of the left (cloned in JS) -->
+    <div class="illustration mirrored" id="illustration-right" aria-hidden="true"></div>
+
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const API = '/.netlify/functions';
+  const FREE_PROVIDERS = ['gmail', 'googlemail', 'yahoo', 'hotmail', 'outlook', 'icloud'];
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const DOMAIN_RE = /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
+  const RESEND_SECONDS = 30;
+
+  let state = {
+    domain: '',
+    resolvedDomain: '',
+    email: '',
+    ref: '',
+    currentStep: 1,
+    token: ''
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const targetInput = $('target-input');
+  const step1Btn = $('step1-btn');
+  const resolveResult = $('resolve-result');
+  const emailInput = $('email-input');
+  const authCheckbox = $('auth-checkbox');
+  const emailError = $('email-error');
+  const step2Btn = $('step2-btn');
+  const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
+  const otpRow = $('otp-row');
+  const otpError = $('otp-error');
+  const step3Btn = $('step3-btn');
+  const resendSection = $('resend-section');
+
+  let resendTimer = null;
+  let requestInFlight = false;
+
+  // ── Mirror the left illustration into the right column ──
+  (function mirrorIllustration() {
+    const src = document.querySelector('#illustration-left svg');
+    if (!src) return;
+    const clone = src.cloneNode(true);
+    const defs = clone.querySelector('defs');
+    if (defs) defs.remove(); // shapes/marker still resolve to the left SVG's ids
+    $('illustration-right').appendChild(clone);
+  })();
+
+  // ── Helpers ──
+  function isLikelyDomain(text) {
+    return text.includes('.') && !/\s/.test(text);
+  }
+
+  function normaliseDomain(text) {
+    return String(text).trim().toLowerCase()
+      .replace(/^[a-z]+:\/\//, '')
+      .replace(/^www\./, '')
+      .split(/[/?#:\s]/)[0]
+      .replace(/\.+$/, '');
+  }
+
+  function isFreeProvider(email) {
+    const host = email.split('@')[1] || '';
+    return FREE_PROVIDERS.includes(host.split('.')[0]);
+  }
+
+  function showError(el, msg) {
+    el.textContent = msg;
+    el.hidden = !msg;
+  }
+
+  async function postJSON(path, body) {
+    const res = await fetch(`${API}/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    let data = {};
+    try { data = await res.json(); } catch (_) { /* non-JSON error page */ }
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  function setBusy(btn, busy, busyText) {
+    requestInFlight = busy;
+    btn.disabled = busy;
+    if (busy) {
+      btn.dataset.label = btn.textContent;
+      btn.textContent = busyText;
+    } else if (btn.dataset.label) {
+      btn.textContent = btn.dataset.label;
+    }
+  }
+
+  // ── Step navigation ──
+  function advanceStep(n) {
+    state.currentStep = n;
+
+    document.querySelectorAll('.step').forEach((el) => {
+      const s = Number(el.dataset.step);
+      const dot = el.querySelector('.step-dot');
+      el.classList.toggle('active', s === n);
+      el.classList.toggle('complete', s < n || (n === 4 && s === 4));
+      dot.textContent = (s < n || (n === 4 && s === 4)) ? '✓' : String(s);
+      if (s === n) el.setAttribute('aria-current', 'step');
+      else el.removeAttribute('aria-current');
+    });
+    document.querySelectorAll('.step-line').forEach((el) => {
+      el.classList.toggle('complete', Number(el.dataset.line) < n);
+    });
+
+    document.querySelectorAll('.panel').forEach((p) => {
+      p.classList.toggle('active', Number(p.dataset.panel) === n);
+    });
+
+    if (n === 2) { emailInput.focus(); }
+    if (n === 3) { otpBoxes[0].focus(); }
+  }
+
+  // ── Step 1 ──
+  function renderResolving() {
+    resolveResult.className = 'show';
+    resolveResult.innerHTML = '<div class="loading"><span class="spinner"></span><span>Resolving...</span></div>';
+  }
+
+  function renderResolveError(msg) {
+    resolveResult.className = 'show';
+    resolveResult.innerHTML = '';
+    const p = document.createElement('div');
+    p.className = 'error';
+    p.setAttribute('role', 'alert');
+    p.textContent = msg;
+    resolveResult.appendChild(p);
+  }
+
+  function renderResolved(domain) {
+    resolveResult.className = 'show';
+    resolveResult.innerHTML =
+      '<div class="resolved-box">' +
+        '<p class="resolved-label">✓ Target identified</p>' +
+        '<p class="resolved-domain" id="resolved-domain"></p>' +
+        '<div class="btn-row">' +
+          '<button type="button" class="btn" id="confirm-domain-btn">Scan this domain</button>' +
+          '<button type="button" class="btn-ghost" id="change-domain-btn">Change</button>' +
+        '</div>' +
+      '</div>';
+    $('resolved-domain').textContent = domain;
+    $('confirm-domain-btn').addEventListener('click', confirmDomain);
+    $('change-domain-btn').addEventListener('click', changeDomain);
+    $('confirm-domain-btn').focus();
+  }
+
+  async function handleStep1() {
+    if (requestInFlight) return;
+    const value = targetInput.value.trim();
+    state.resolvedDomain = '';
+
+    if (!value) {
+      renderResolveError('Enter a domain or organisation name.');
+      targetInput.focus();
+      return;
+    }
+
+    if (isLikelyDomain(value)) {
+      const domain = normaliseDomain(value);
+      if (!DOMAIN_RE.test(domain)) {
+        renderResolveError("That doesn't look like a valid domain.");
+        return;
+      }
+      state.resolvedDomain = domain;
+      renderResolved(domain);
+      return;
+    }
+
+    setBusy(step1Btn, true, 'Resolving...');
+    renderResolving();
+    try {
+      const { ok, data } = await postJSON('resolve-domain', { query: value });
+      if (ok && data.domain) {
+        state.resolvedDomain = data.domain;
+        renderResolved(data.domain);
+      } else {
+        renderResolveError(data.error || "Couldn't identify a domain. Try entering it directly.");
+      }
+    } catch (_) {
+      renderResolveError('Network error. Check your connection and try again.');
+    } finally {
+      setBusy(step1Btn, false);
+    }
+  }
+
+  function confirmDomain() {
+    if (!state.resolvedDomain) return;
+    state.domain = state.resolvedDomain;
+    $('auth-domain').textContent = state.domain;
+    advanceStep(2);
+  }
+
+  function changeDomain() {
+    state.resolvedDomain = '';
+    resolveResult.className = '';
+    resolveResult.innerHTML = '';
+    targetInput.focus();
+    targetInput.select();
+  }
+
+  // ── Step 2 ──
+  async function sendCode() {
+    return postJSON('send-otp', { email: state.email, domain: state.domain });
+  }
+
+  async function handleStep2() {
+    if (requestInFlight) return;
+    const email = emailInput.value.trim().toLowerCase();
+    showError(emailError, '');
+
+    if (!EMAIL_RE.test(email)) {
+      showError(emailError, 'Enter a valid email address.');
+      emailInput.focus();
+      return;
+    }
+    if (isFreeProvider(email)) {
+      showError(emailError, "Please use your work email — personal email providers aren't accepted.");
+      emailInput.focus();
+      return;
+    }
+    if (!authCheckbox.checked) {
+      showError(emailError, 'Please confirm you are authorised to request this scan.');
+      authCheckbox.focus();
+      return;
+    }
+
+    state.email = email;
+    setBusy(step2Btn, true, 'Sending...');
+    try {
+      const { ok, data } = await sendCode();
+      if (ok && data.sent) {
+        state.token = data.token || '';
+        $('otp-email').textContent = email;
+        clearOtp();
+        showError(otpError, '');
+        advanceStep(3);
+        startResendCountdown();
+      } else {
+        showError(emailError, data.error || "We couldn't send the code. Please try again.");
+      }
+    } catch (_) {
+      showError(emailError, 'Network error. Check your connection and try again.');
+    } finally {
+      setBusy(step2Btn, false);
+    }
+  }
+
+  // ── Step 3 ──
+  function clearOtp() {
+    otpBoxes.forEach((b) => { b.value = ''; });
+  }
+
+  function collectOtp() {
+    return otpBoxes.map((b) => b.value).join('');
+  }
+
+  function fillOtp(digits, startIndex) {
+    const chars = digits.replace(/\D/g, '').slice(0, otpBoxes.length - startIndex).split('');
+    chars.forEach((c, i) => { otpBoxes[startIndex + i].value = c; });
+    const next = Math.min(startIndex + chars.length, otpBoxes.length - 1);
+    otpBoxes[next].focus();
+    if (collectOtp().length === otpBoxes.length) step3Btn.focus();
+  }
+
+  otpBoxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+      const digits = box.value.replace(/\D/g, '');
+      if (digits.length > 1) {        // autofill/IME can put several digits in one box
+        box.value = '';
+        fillOtp(digits, i);
+        return;
+      }
+      box.value = digits;
+      if (digits && i < otpBoxes.length - 1) otpBoxes[i + 1].focus();
+      if (collectOtp().length === otpBoxes.length) step3Btn.focus();
+    });
+
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && i > 0) {
+        e.preventDefault();
+        otpBoxes[i - 1].value = '';
+        otpBoxes[i - 1].focus();
+      } else if (e.key === 'ArrowLeft' && i > 0) {
+        otpBoxes[i - 1].focus();
+      } else if (e.key === 'ArrowRight' && i < otpBoxes.length - 1) {
+        otpBoxes[i + 1].focus();
+      } else if (e.key === 'Enter') {
+        handleStep3();
+      }
+    });
+
+    box.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+      fillOtp(text, text.replace(/\D/g, '').length >= otpBoxes.length ? 0 : i);
+    });
+
+    box.addEventListener('focus', () => box.select());
+  });
+
+  function otpFailed(msg) {
+    showError(otpError, msg);
+    clearOtp();
+    otpRow.classList.remove('shake');
+    void otpRow.offsetWidth; // restart animation
+    otpRow.classList.add('shake');
+    otpBoxes[0].focus();
+  }
+
+  async function handleStep3() {
+    if (requestInFlight) return;
+    const otp = collectOtp();
+    showError(otpError, '');
+
+    if (!/^\d{6}$/.test(otp)) {
+      showError(otpError, 'Enter all 6 digits.');
+      otpBoxes[otp.length < 6 ? otp.length : 0].focus();
+      return;
+    }
+
+    setBusy(step3Btn, true, 'Verifying...');
+    try {
+      const { ok, data } = await postJSON('verify-otp', {
+        email: state.email,
+        otp,
+        domain: state.domain,
+        token: state.token
+      });
+      if (ok && data.verified) {
+        state.ref = data.ref;
+        stopResendCountdown();
+        showConfirmation();
+      } else {
+        otpFailed(data.error || 'Invalid or expired code');
+      }
+    } catch (_) {
+      otpFailed('Network error. Check your connection and try again.');
+    } finally {
+      setBusy(step3Btn, false);
+    }
+  }
+
+  // ── Resend ──
+  function stopResendCountdown() {
+    if (resendTimer) { clearInterval(resendTimer); resendTimer = null; }
+  }
+
+  function startResendCountdown() {
+    stopResendCountdown();
+    let remaining = RESEND_SECONDS;
+    resendSection.textContent = `Resend in ${remaining}s`;
+    resendTimer = setInterval(() => {
+      remaining -= 1;
+      if (remaining > 0) {
+        resendSection.textContent = `Resend in ${remaining}s`;
+        return;
+      }
+      stopResendCountdown();
+      resendSection.innerHTML = '';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'link-btn';
+      btn.id = 'resend-btn';
+      btn.textContent = 'Resend code';
+      btn.addEventListener('click', handleResend);
+      resendSection.appendChild(btn);
+    }, 1000);
+  }
+
+  async function handleResend() {
+    const btn = $('resend-btn');
+    if (!btn || requestInFlight) return;
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    showError(otpError, '');
+    try {
+      const { ok, data } = await sendCode();
+      if (ok && data.sent) {
+        state.token = data.token || '';
+        clearOtp();
+        otpBoxes[0].focus();
+        startResendCountdown();
+      } else {
+        showError(otpError, data.error || "We couldn't resend the code. Please try again.");
+        btn.disabled = false;
+        btn.textContent = 'Resend code';
+      }
+    } catch (_) {
+      showError(otpError, 'Network error. Check your connection and try again.');
+      btn.disabled = false;
+      btn.textContent = 'Resend code';
+    }
+  }
+
+  // ── Step 4 ──
+  function showConfirmation() {
+    $('done-email').textContent = state.email;
+    $('done-email-2').textContent = state.email;
+    $('done-domain').textContent = state.domain;
+    $('done-domain-2').textContent = state.domain;
+    $('ref-value').textContent = state.ref;
+    advanceStep(4);
+  }
+
+  // ── Wiring ──
+  document.querySelectorAll('.chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      targetInput.value = chip.textContent;
+      changeDomain();
+    });
+  });
+  targetInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleStep1(); });
+  targetInput.addEventListener('input', () => {
+    if (state.resolvedDomain) { state.resolvedDomain = ''; resolveResult.className = ''; resolveResult.innerHTML = ''; }
+  });
+  step1Btn.addEventListener('click', handleStep1);
+
+  emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleStep2(); });
+  step2Btn.addEventListener('click', handleStep2);
+
+  step3Btn.addEventListener('click', handleStep3);
+
+  targetInput.focus();
+})();
+</script>
+</body>
+</html>
