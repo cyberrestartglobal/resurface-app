@@ -125,6 +125,9 @@
   .n3 { --d: 0.45s; }
   .n4 { --d: 0.6s; }
   .n5 { --d: 0.75s; }
+  .n6 { --d: 0.9s; }
+  .ill-heading--source { fill: #06b6d4; }
+  .ill-heading--finding { fill: #f59e0b; }
 
   .flows { opacity: 0; animation: ill-fade 0.8s ease forwards 0.9s; }
   .flow-base { fill: none; stroke: #1e3a5c; stroke-width: 1.5; }
@@ -602,65 +605,74 @@
 <main class="hero">
   <div class="hero-grid">
 
-    <!-- Left illustration: what ReSurface looks at (scan sources → card) -->
+    <!-- Left illustration: the organisation's exposed footprint, flowing into ReSurface -->
     <div class="illustration" id="illustration-left" aria-hidden="true">
       <svg viewBox="0 0 300 500" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-        <text class="ill-heading" x="12" y="28">WHAT WE LOOK AT</text>
+        <text class="ill-heading ill-heading--source" x="12" y="28">YOUR EXPOSED FOOTPRINT</text>
 
         <g class="flows">
-          <path class="flow-base" d="M204 70 C252 70 256 250 292 250"/>
-          <path class="flow-base" d="M204 160 C252 160 256 250 292 250"/>
-          <path class="flow-base" d="M204 250 L292 250"/>
-          <path class="flow-base" d="M204 340 C252 340 256 250 292 250"/>
-          <path class="flow-base" d="M204 430 C252 430 256 250 292 250"/>
-          <path class="flow flow--source" d="M204 70 C252 70 256 250 292 250"/>
-          <path class="flow flow--source" d="M204 160 C252 160 256 250 292 250"/>
-          <path class="flow flow--source" d="M204 250 L292 250"/>
-          <path class="flow flow--source" d="M204 340 C252 340 256 250 292 250"/>
-          <path class="flow flow--source" d="M204 430 C252 430 256 250 292 250"/>
+          <path class="flow-base" d="M220 70 C260 70 262 250 292 250"/>
+          <path class="flow-base" d="M220 142 C260 142 262 250 292 250"/>
+          <path class="flow-base" d="M220 214 C260 214 262 250 292 250"/>
+          <path class="flow-base" d="M220 286 C260 286 262 250 292 250"/>
+          <path class="flow-base" d="M220 358 C260 358 262 250 292 250"/>
+          <path class="flow-base" d="M220 430 C260 430 262 250 292 250"/>
+          <path class="flow flow--source" d="M220 70 C260 70 262 250 292 250"/>
+          <path class="flow flow--source" d="M220 142 C260 142 262 250 292 250"/>
+          <path class="flow flow--source" d="M220 214 C260 214 262 250 292 250"/>
+          <path class="flow flow--source" d="M220 286 C260 286 262 250 292 250"/>
+          <path class="flow flow--source" d="M220 358 C260 358 262 250 292 250"/>
+          <path class="flow flow--source" d="M220 430 C260 430 262 250 292 250"/>
           <path class="flow-end--source" d="M287 244 L295 250 L287 256"/>
         </g>
 
-        <!-- Subdomains -->
+        <!-- API endpoints -->
         <g class="ill-node ill-node--source n1">
-          <rect x="8" y="48" width="196" height="44" rx="10"/>
+          <rect x="8" y="48" width="212" height="44" rx="10"/>
           <g class="ill-icon" transform="translate(22 60)">
-            <circle cx="10" cy="10" r="8"/><ellipse cx="10" cy="10" rx="3.5" ry="8"/><path d="M2 10 H18"/>
-          </g>
-          <text x="52" y="74">Subdomains</text>
-        </g>
-        <!-- Live hosts & ports -->
-        <g class="ill-node ill-node--source n2">
-          <rect x="8" y="138" width="196" height="44" rx="10"/>
-          <g class="ill-icon" transform="translate(22 150)">
-            <rect x="3" y="3" width="14" height="6" rx="1.5"/><rect x="3" y="11" width="14" height="6" rx="1.5"/>
-            <circle class="dot" cx="6.5" cy="6" r="1"/><circle class="dot" cx="6.5" cy="14" r="1"/>
-          </g>
-          <text x="52" y="164">Live hosts &amp; ports</text>
-        </g>
-        <!-- APIs & surface -->
-        <g class="ill-node ill-node--source n3">
-          <rect x="8" y="228" width="196" height="44" rx="10"/>
-          <g class="ill-icon" transform="translate(22 240)">
             <path d="M7 5.5 L2.5 10 L7 14.5"/><path d="M13 5.5 L17.5 10 L13 14.5"/><path d="M11.2 4 L8.8 16"/>
           </g>
-          <text x="52" y="254">APIs &amp; surface</text>
-        </g>
-        <!-- Cloud infrastructure -->
-        <g class="ill-node ill-node--source n4">
-          <rect x="8" y="318" width="196" height="44" rx="10"/>
-          <g class="ill-icon" transform="translate(22 330)">
-            <path d="M6 15.5 H14.5 A3.5 3.5 0 0 0 14.9 8.52 A5 5 0 0 0 5.3 9.2 A3.2 3.2 0 0 0 6 15.5 Z"/>
-          </g>
-          <text x="52" y="344">Cloud infrastructure</text>
+          <text x="52" y="74">API endpoints</text>
         </g>
         <!-- Mobile apps -->
-        <g class="ill-node ill-node--source n5">
-          <rect x="8" y="408" width="196" height="44" rx="10"/>
-          <g class="ill-icon" transform="translate(22 420)">
+        <g class="ill-node ill-node--source n2">
+          <rect x="8" y="120" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 132)">
             <rect x="5.5" y="2" width="9" height="16" rx="2"/><path d="M9 15 H11"/>
           </g>
-          <text x="52" y="434">Mobile apps</text>
+          <text x="52" y="146">Mobile apps</text>
+        </g>
+        <!-- Executives & people -->
+        <g class="ill-node ill-node--source n3">
+          <rect x="8" y="192" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 204)">
+            <circle cx="7" cy="6.5" r="2.6"/><path d="M2 16.5 C2 13.7 4.2 11.7 7 11.7 S12 13.7 12 16.5"/><circle cx="14" cy="7.5" r="2.2"/><path d="M13.2 11.9 C16 11.6 18 13.5 18 16"/>
+          </g>
+          <text x="52" y="218">Executives &amp; people</text>
+        </g>
+        <!-- Subdomains & assets -->
+        <g class="ill-node ill-node--source n4">
+          <rect x="8" y="264" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 276)">
+            <circle cx="10" cy="10" r="8"/><ellipse cx="10" cy="10" rx="3.5" ry="8"/><path d="M2 10 H18"/>
+          </g>
+          <text x="52" y="290">Subdomains &amp; assets</text>
+        </g>
+        <!-- Cloud & gateways -->
+        <g class="ill-node ill-node--source n5">
+          <rect x="8" y="336" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 348)">
+            <path d="M6 12.5 H14.5 A3.5 3.5 0 0 0 14.9 5.52 A5 5 0 0 0 5.3 6.2 A3.2 3.2 0 0 0 6 12.5 Z"/><path d="M10 12.5 V17.5"/><path d="M6.5 17.5 H13.5"/>
+          </g>
+          <text x="52" y="362">Cloud &amp; gateways</text>
+        </g>
+        <!-- Published claims -->
+        <g class="ill-node ill-node--source n6">
+          <rect x="8" y="408" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 420)">
+            <path d="M5 2.5 H12 L15.5 6 V17.5 H5 Z"/><path d="M12 2.5 V6 H15.5"/><path d="M7.5 10 H13"/><path d="M7.5 13 H13"/>
+          </g>
+          <text x="52" y="434">Published claims</text>
         </g>
       </svg>
     </div>
@@ -774,67 +786,64 @@
       </p>
     </div>
 
-    <!-- Right illustration: what ReSurface surfaces (findings → card) -->
+    <!-- Right illustration: what an attacker achieves with it, flowing back to ReSurface -->
     <div class="illustration" id="illustration-right" aria-hidden="true">
       <svg viewBox="0 0 300 500" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-        <text class="ill-heading" x="288" y="28" text-anchor="end">WHAT WE SURFACE</text>
+        <text class="ill-heading ill-heading--finding" x="288" y="28" text-anchor="end">WHAT AN ATTACKER ACHIEVES</text>
 
         <g class="flows">
-          <path class="flow-base" d="M96 70 C48 70 44 250 8 250"/>
-          <path class="flow-base" d="M96 160 C48 160 44 250 8 250"/>
-          <path class="flow-base" d="M96 250 L8 250"/>
-          <path class="flow-base" d="M96 340 C48 340 44 250 8 250"/>
-          <path class="flow-base" d="M96 430 C48 430 44 250 8 250"/>
-          <path class="flow flow--finding" d="M96 70 C48 70 44 250 8 250"/>
-          <path class="flow flow--finding" d="M96 160 C48 160 44 250 8 250"/>
-          <path class="flow flow--finding" d="M96 250 L8 250"/>
-          <path class="flow flow--finding" d="M96 340 C48 340 44 250 8 250"/>
-          <path class="flow flow--finding" d="M96 430 C48 430 44 250 8 250"/>
+          <path class="flow-base" d="M80 70 C40 70 38 250 8 250"/>
+          <path class="flow-base" d="M80 160 C40 160 38 250 8 250"/>
+          <path class="flow-base" d="M80 250 L8 250"/>
+          <path class="flow-base" d="M80 340 C40 340 38 250 8 250"/>
+          <path class="flow-base" d="M80 430 C40 430 38 250 8 250"/>
+          <path class="flow flow--finding" d="M80 70 C40 70 38 250 8 250"/>
+          <path class="flow flow--finding" d="M80 160 C40 160 38 250 8 250"/>
+          <path class="flow flow--finding" d="M80 250 L8 250"/>
+          <path class="flow flow--finding" d="M80 340 C40 340 38 250 8 250"/>
+          <path class="flow flow--finding" d="M80 430 C40 430 38 250 8 250"/>
           <path class="flow-end--finding" d="M13 244 L5 250 L13 256"/>
         </g>
 
-        <!-- Exposed admin panels -->
+        <!-- Financial fraud -->
         <g class="ill-node ill-node--finding n1">
-          <rect x="96" y="48" width="196" height="44" rx="10"/>
-          <g class="ill-icon" transform="translate(110 60)">
-            <rect x="2" y="3.5" width="16" height="13" rx="1.5"/><path d="M2 7 H18"/>
-            <path d="M10 9.5 V12.5"/><circle class="dot" cx="10" cy="14.4" r="0.8"/>
+          <rect x="80" y="48" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(94 60)">
+            <rect x="2" y="5" width="16" height="10" rx="1.5"/><path d="M10 7.5 V10.5"/><circle class="dot" cx="10" cy="12.6" r="0.8"/>
           </g>
-          <text x="140" y="74">Exposed admin panels</text>
+          <text x="124" y="74">Financial fraud</text>
         </g>
-        <!-- Leaked credentials -->
+        <!-- Account takeover -->
         <g class="ill-node ill-node--finding n2">
-          <rect x="96" y="138" width="196" height="44" rx="10"/>
-          <g class="ill-icon" transform="translate(110 150)">
-            <circle cx="6.5" cy="10" r="3.5"/><path d="M10 10 H18"/><path d="M15 10 V13"/><path d="M17.5 10 V12.2"/>
+          <rect x="80" y="138" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(94 150)">
+            <rect x="4" y="9" width="12" height="8.5" rx="1.5"/><path d="M7 9 V6.5 A3 3 0 0 1 12.8 5.4"/><path d="M10 12 V14.3"/>
           </g>
-          <text x="140" y="164">Leaked credentials</text>
+          <text x="124" y="164">Account takeover</text>
         </g>
-        <!-- Impersonation domains -->
+        <!-- Back-office compromise -->
         <g class="ill-node ill-node--finding n3">
-          <rect x="96" y="228" width="196" height="44" rx="10"/>
-          <g class="ill-icon" transform="translate(110 240)">
-            <circle cx="7.5" cy="10" r="5.5"/><circle cx="12.5" cy="10" r="5.5" stroke-dasharray="2 1.8"/>
+          <rect x="80" y="228" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(94 240)">
+            <rect x="2.5" y="3" width="11" height="6" rx="1.5"/><rect x="2.5" y="11" width="11" height="6" rx="1.5"/><circle class="dot" cx="5.5" cy="6" r="1"/><circle class="dot" cx="5.5" cy="14" r="1"/><path d="M17 4 V9.5"/><circle class="dot" cx="17" cy="12.2" r="0.8"/>
           </g>
-          <text x="140" y="254">Impersonation domains</text>
+          <text x="124" y="254">Back-office compromise</text>
         </g>
-        <!-- Executive exposure -->
+        <!-- Privacy & consent breach -->
         <g class="ill-node ill-node--finding n4">
-          <rect x="96" y="318" width="196" height="44" rx="10"/>
-          <g class="ill-icon" transform="translate(110 330)">
-            <circle cx="8" cy="6.5" r="3"/><path d="M2.5 17 C2.5 13.8 5 11.5 8 11.5 S13.5 13.8 13.5 17"/>
-            <path d="M16.5 3.5 V8.5"/><circle class="dot" cx="16.5" cy="11" r="0.8"/>
+          <rect x="80" y="318" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(94 330)">
+            <path d="M2 10 C4.5 5.5 15.5 5.5 18 10 C15.5 14.5 4.5 14.5 2 10 Z"/><circle cx="10" cy="10" r="2.3"/><path d="M4 16 L16 4"/>
           </g>
-          <text x="140" y="344">Executive exposure</text>
+          <text x="124" y="344">Privacy &amp; consent breach</text>
         </g>
-        <!-- Misconfigurations -->
+        <!-- Regulatory penalties -->
         <g class="ill-node ill-node--finding n5">
-          <rect x="96" y="408" width="196" height="44" rx="10"/>
-          <g class="ill-icon" transform="translate(110 420)">
-            <path d="M2.5 6 H17.5"/><path d="M2.5 14 H17.5"/>
-            <circle class="knob" cx="7" cy="6" r="2.2"/><circle class="knob" cx="13" cy="14" r="2.2"/>
+          <rect x="80" y="408" width="212" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(94 420)">
+            <path d="M10 2.5 L18 16.5 H2 Z"/><path d="M10 7.5 V11.3"/><circle class="dot" cx="10" cy="13.8" r="0.8"/>
           </g>
-          <text x="140" y="434">Misconfigurations</text>
+          <text x="124" y="434">Regulatory penalties</text>
         </g>
       </svg>
     </div>
