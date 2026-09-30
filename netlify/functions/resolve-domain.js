@@ -1,6 +1,11 @@
-// POST {query} -> {domain}
-// A domain-shaped query is normalised and returned as-is; anything else
-// (an organisation name) is resolved to its primary domain via Groq.
+// POST {query} -> {domain} | {domain: null, error}
+// Accepts any way a visitor might identify their organisation. Checked in
+// this order, cheapest first — only the last case costs a Groq call:
+//   raw IP address           -> rejected (IP scans need a full engagement)
+//   email / @domain          -> domain after the @ (personal providers rejected)
+//   full URL                 -> its hostname
+//   bare domain              -> used directly
+//   anything else            -> org name or freeform description, via Groq
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "openai/gpt-oss-120b";
@@ -12,6 +17,16 @@ const MAX_TOKENS = 256;
 const MAX_QUERY_LENGTH = 200;
 
 const DOMAIN_RE = /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
+const IPV4_RE = /^\d{1,3}(?:\.\d{1,3}){3}$/;
+// IPv6 literal: 2–7 colons between hex groups, optionally bracketed with a port.
+const IPV6_RE = /^\[?(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}\]?(?::\d+)?$/i;
+// Same list the page uses for its work-email check.
+const FREE_PROVIDERS = ["gmail", "googlemail", "yahoo", "hotmail", "outlook", "icloud"];
+
+const ERR_IP = "Please enter a domain or organisation name. IP-based scans are available with a full engagement.";
+const ERR_UNKNOWN = "We couldn't identify a specific organisation from that. Try adding the name, location, or sector — or enter the domain directly.";
+const ERR_INVALID = "That doesn't look like a valid domain. Check the spelling, or describe the organisation instead.";
+const ERR_FREE_EMAIL = "That's a personal email provider, not your organisation's domain. Enter your work email domain, the organisation name, or its website.";
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -19,19 +34,53 @@ const json = (statusCode, body) => ({
   body: JSON.stringify(body),
 });
 
-function isLikelyDomain(text) {
-  return text.includes(".") && !/\s/.test(text);
+const fail = (statusCode, error) => json(statusCode, { domain: null, error });
+
+function isIpAddress(text) {
+  const host = String(text).trim().replace(/^\[|\]$/g, "");
+  return IPV4_RE.test(host.replace(/:\d+$/, "")) || IPV6_RE.test(text.trim());
 }
 
-function normaliseDomain(text) {
+// Hostname from anything domain-shaped: strips scheme, credentials, www.,
+// port, path, query, fragment and trailing dots.
+function normaliseHost(text) {
   return String(text)
     .trim()
     .toLowerCase()
     .replace(/[`"'<>]/g, "")
-    .replace(/^[a-z]+:\/\//, "")
+    .replace(/^[a-z][a-z0-9+.-]*:\/\//, "")
+    .replace(/^[^/@]*@/, "")
     .replace(/^www\./, "")
-    .split(/[/?#:\s]/)[0]
+    .split(/[/?#\s]/)[0]
+    .replace(/:\d+$/, "")
     .replace(/\.+$/, "");
+}
+
+// Returns {domain} or {error, status} for the non-AI cases, or null when the
+// query needs Groq.
+function resolveLocally(query) {
+  if (isIpAddress(query)) return { error: ERR_IP, status: 422 };
+
+  // Email address or bare "@company.com"
+  const email = query.match(/^[^\s@]*@([^\s@]+)$/);
+  if (email) {
+    const host = normaliseHost(email[1]);
+    if (isIpAddress(host)) return { error: ERR_IP, status: 422 };
+    if (!DOMAIN_RE.test(host)) return { error: ERR_INVALID, status: 422 };
+    if (FREE_PROVIDERS.includes(host.split(".")[0])) return { error: ERR_FREE_EMAIL, status: 422 };
+    return { domain: host };
+  }
+
+  // Full URL (scheme present), or a bare domain with or without a path.
+  const hasScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(query);
+  if (hasScheme || (query.includes(".") && !/\s/.test(query))) {
+    const host = normaliseHost(query);
+    if (isIpAddress(host)) return { error: ERR_IP, status: 422 };
+    if (!DOMAIN_RE.test(host)) return { error: ERR_INVALID, status: 422 };
+    return { domain: host };
+  }
+
+  return null; // organisation name or freeform description
 }
 
 async function resolveWithGroq(query) {
@@ -56,9 +105,14 @@ async function resolveWithGroq(query) {
           {
             role: "user",
             content:
-              "Return only the primary website domain for this organisation. " +
-              "Reply with just the domain, nothing else, no www prefix. " +
-              `Organisation: ${query}`,
+              "You resolve any description of an organisation to its primary website domain. " +
+              "The input may be a domain, a URL, an email domain, an exact organisation name, " +
+              "or a freeform description such as 'the biggest fintech in Lagos' or 'the telecoms " +
+              "company MTN operates in South Africa'. Use your knowledge to identify the single " +
+              "most likely organisation and return ONLY its primary registered website domain — " +
+              "lowercase, no www, no protocol, no path, nothing else. If you genuinely cannot " +
+              "identify a specific organisation with reasonable confidence, return exactly: UNKNOWN\n" +
+              `Input: ${query}`,
           },
         ],
       }),
@@ -76,38 +130,35 @@ async function resolveWithGroq(query) {
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") return { statusCode: 204, body: "" };
-  if (event.httpMethod !== "POST") return json(405, { error: "Method not allowed" });
+  if (event.httpMethod !== "POST") return fail(405, "Method not allowed");
 
   let query;
   try {
     query = String(JSON.parse(event.body || "{}").query || "").trim();
   } catch {
-    return json(400, { error: "Invalid JSON body" });
+    return fail(400, "Invalid JSON body");
   }
-  if (!query) return json(400, { error: "Enter a domain or organisation name" });
-  if (query.length > MAX_QUERY_LENGTH) return json(400, { error: "Query too long" });
+  if (!query) return fail(400, "Enter your domain or any detail about your organisation.");
+  if (query.length > MAX_QUERY_LENGTH) return fail(400, "That's a bit long — try a shorter description.");
 
-  if (isLikelyDomain(query)) {
-    const domain = normaliseDomain(query);
-    if (!DOMAIN_RE.test(domain)) return json(422, { error: "That doesn't look like a valid domain" });
-    return json(200, { domain });
-  }
+  const local = resolveLocally(query);
+  if (local) return local.domain ? json(200, { domain: local.domain }) : fail(local.status, local.error);
 
   try {
-    const raw = await resolveWithGroq(query);
+    const raw = (await resolveWithGroq(query)).trim();
+    if (/^unknown\.?$/i.test(raw)) return fail(422, ERR_UNKNOWN);
+
     // Take the first domain-shaped token, in case the model adds words anyway.
     const candidate = (raw.match(/[a-z0-9.-]+\.[a-z]{2,63}/i) || [""])[0];
-    const domain = normaliseDomain(candidate);
+    const domain = normaliseHost(candidate);
     if (!DOMAIN_RE.test(domain)) {
       console.warn("resolve-domain: unusable model output", { query, raw });
-      return json(422, { error: "Couldn't identify a domain for that organisation. Try entering the domain directly." });
+      return fail(422, ERR_UNKNOWN);
     }
     return json(200, { domain });
   } catch (err) {
     const timedOut = err.name === "AbortError";
     console.error("resolve-domain failed:", timedOut ? "timeout" : err.message);
-    return json(timedOut ? 504 : 502, {
-      error: "Domain lookup is unavailable right now. Try entering the domain directly.",
-    });
+    return fail(timedOut ? 504 : 502, "Domain lookup is unavailable right now. Try entering the domain directly.");
   }
 };

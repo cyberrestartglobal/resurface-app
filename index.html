@@ -53,11 +53,10 @@
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border);
   }
+  /* Logo artwork is light-on-transparent, so it sits directly on the dark header. */
   .logo {
-    color: var(--text);
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
     text-decoration: none;
   }
   .back-link {
@@ -81,7 +80,7 @@
   }
   .hero-grid {
     display: grid;
-    grid-template-columns: 30% 40% 30%;
+    grid-template-columns: 28% 44% 28%;
     align-items: center;
     width: 100%;
     max-width: 1280px;
@@ -92,32 +91,62 @@
     align-items: center;
   }
   .illustration svg { width: 100%; height: 500px; }
-  .illustration.mirrored svg { transform: scaleX(-1); }
-  .card-col { display: flex; justify-content: center; }
+  .card-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-  /* Network illustration */
-  .net-link {
-    stroke: #1e2d3d;
-    stroke-width: 1;
+  /* Scan-taxonomy illustrations */
+  .ill-heading {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    fill: #64748b;
+    opacity: 0;
+    animation: ill-fade 0.7s ease forwards;
+  }
+  .ill-node {
+    opacity: 0;
+    transform-box: fill-box;
+    animation:
+      ill-fade 0.7s ease forwards var(--d),
+      ill-float 5s ease-in-out infinite alternate calc(var(--d) + 0.7s);
+  }
+  .ill-node rect { fill: #0d0d14; stroke: currentColor; stroke-opacity: 0.75; stroke-width: 1; }
+  .ill-node text { fill: #cbd5e1; font-family: 'Inter', system-ui, sans-serif; font-size: 12px; font-weight: 500; }
+  .ill-node--source { color: #06b6d4; }
+  .ill-node--finding { color: #f59e0b; }
+  .ill-icon { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .ill-icon .dot { fill: currentColor; stroke: none; }
+  .ill-icon .knob { fill: #0d0d14; }
+  .n1 { --d: 0.15s; }
+  .n2 { --d: 0.3s; }
+  .n3 { --d: 0.45s; }
+  .n4 { --d: 0.6s; }
+  .n5 { --d: 0.75s; }
+
+  .flows { opacity: 0; animation: ill-fade 0.8s ease forwards 0.9s; }
+  .flow-base { fill: none; stroke: #1e3a5c; stroke-width: 1.5; }
+  .flow {
     fill: none;
-    animation: pulse 3s ease-in-out infinite;
+    stroke-width: 1.5;
+    stroke-dasharray: 4 8;
+    animation: ill-flow 1.6s linear infinite;
   }
-  .net-main { stroke-width: 1.5; }
-  .net-node { fill: var(--cyan); opacity: 0.6; }
-  .net-outline { fill: none; stroke: var(--cyan); stroke-width: 1.5; opacity: 0.6; }
-  .net-arrow { fill: var(--cyan); opacity: 0.6; }
-  .d1 { animation-delay: 0.5s; }
-  .d2 { animation-delay: 1s; }
-  .d3 { animation-delay: 1.5s; }
-  .d4 { animation-delay: 2s; }
-  .d5 { animation-delay: 2.5s; }
-  @keyframes pulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.8; }
-  }
+  .flow--source { stroke: #06b6d4; stroke-opacity: 0.8; }
+  .flow--finding { stroke: #f59e0b; stroke-opacity: 0.8; }
+  .flow-end--source { fill: none; stroke: #06b6d4; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .flow-end--finding { fill: none; stroke: #f59e0b; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  @keyframes ill-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes ill-float { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+  /* Paths are drawn node → card, so a negative offset moves dashes toward the card. */
+  @keyframes ill-flow { to { stroke-dashoffset: -24; } }
 
   /* ── Card ───────────────────────────────── */
   .card {
+    position: relative;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -126,6 +155,49 @@
     max-width: 480px;
     width: 100%;
   }
+
+  /* Scanning glow: a slow cyan arc travelling round the card border.
+     Browsers without @property show the arc static. */
+  @property --scan-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 17px;
+    padding: 1px;
+    background: conic-gradient(
+      from var(--scan-angle),
+      transparent 0deg 250deg,
+      rgba(6, 182, 212, 0.12) 290deg,
+      rgba(6, 182, 212, 0.55) 345deg,
+      transparent 360deg
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: scan-rotate 8s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes scan-rotate { to { --scan-angle: 360deg; } }
+
+  /* Trust strip */
+  .trust-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 10px;
+    max-width: 480px;
+    margin: 20px 0 0;
+    padding: 0 8px;
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
+  }
+  .trust-sep { color: #334155; }
 
   /* Step indicator */
   .steps {
@@ -231,24 +303,21 @@
     box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.08);
   }
 
-  .chips {
+  .input-reassure {
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 12px;
+    align-items: center;
+    gap: 6px;
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: var(--cyan);
   }
-  .chip {
-    background: #1a1a2e;
+  .input-reassure svg { width: 14px; height: 14px; flex: 0 0 auto; }
+  .input-hint {
+    margin: 6px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
     color: #64748b;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 14px;
-    font-size: 11px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
   }
-  .chip:hover { color: var(--text-secondary); border-color: var(--input-border); }
 
   /* Buttons */
   .btn {
@@ -267,7 +336,7 @@
   }
   .btn:hover:not(:disabled) { background: var(--cyan-hover); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn:focus-visible, .chip:focus-visible, .btn-ghost:focus-visible, .link-btn:focus-visible {
+  .btn:focus-visible, .btn-ghost:focus-visible, .link-btn:focus-visible {
     outline: 2px solid var(--cyan);
     outline-offset: 2px;
   }
@@ -330,13 +399,20 @@
     border-radius: 8px;
     padding: 16px;
   }
-  .resolved-label { color: var(--cyan); font-size: 12px; margin: 0 0 6px; }
+  .resolved-label { color: var(--text-secondary); font-size: 12px; margin: 0 0 6px; }
   .resolved-domain {
     font-family: var(--mono);
     font-size: 1.1rem;
     color: var(--cyan);
     margin: 0;
     word-break: break-all;
+  }
+  .resolved-box .btn { margin-top: 14px; }
+  .resolved-change {
+    margin: 12px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
   }
 
   .error {
@@ -507,90 +583,85 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .net-link, .spinner, .status-dot, .otp-row.shake { animation: none; }
-    .status-dot { opacity: 1; }
-    .net-link { opacity: 0.55; }
+    .spinner, .status-dot, .otp-row.shake,
+    .ill-heading, .ill-node, .flows, .flow { animation: none; }
+    .status-dot, .ill-heading, .ill-node, .flows { opacity: 1; }
+    .card::before { display: none; }
   }
 </style>
 </head>
 <body>
 
 <header class="site-header">
-  <a class="logo" href="https://cyberrestart.com">CyberRestart</a>
+  <a class="logo" href="https://cyberrestart.com">
+    <img src="assets/images/CyberRestartLogoWithoutSlogan.png" alt="CyberRestart" style="height:34px; width:auto;">
+  </a>
   <a class="back-link" href="https://cyberrestart.com">← Back<span class="long"> to cyberrestart.com</span></a>
 </header>
 
 <main class="hero">
   <div class="hero-grid">
 
-    <!-- Left illustration: attack-surface network converging on the card -->
+    <!-- Left illustration: what ReSurface looks at (scan sources → card) -->
     <div class="illustration" id="illustration-left" aria-hidden="true">
       <svg viewBox="0 0 300 500" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <polygon id="net-hex" points="9,0 4.5,7.8 -4.5,7.8 -9,0 -4.5,-7.8 4.5,-7.8"/>
-          <g id="net-person">
-            <circle cx="0" cy="-8" r="5"/>
-            <path d="M-9,10 Q-9,-1 0,-1 Q9,-1 9,10 Z"/>
+        <text class="ill-heading" x="12" y="28">WHAT WE LOOK AT</text>
+
+        <g class="flows">
+          <path class="flow-base" d="M204 70 C252 70 256 250 292 250"/>
+          <path class="flow-base" d="M204 160 C252 160 256 250 292 250"/>
+          <path class="flow-base" d="M204 250 L292 250"/>
+          <path class="flow-base" d="M204 340 C252 340 256 250 292 250"/>
+          <path class="flow-base" d="M204 430 C252 430 256 250 292 250"/>
+          <path class="flow flow--source" d="M204 70 C252 70 256 250 292 250"/>
+          <path class="flow flow--source" d="M204 160 C252 160 256 250 292 250"/>
+          <path class="flow flow--source" d="M204 250 L292 250"/>
+          <path class="flow flow--source" d="M204 340 C252 340 256 250 292 250"/>
+          <path class="flow flow--source" d="M204 430 C252 430 256 250 292 250"/>
+          <path class="flow-end--source" d="M287 244 L295 250 L287 256"/>
+        </g>
+
+        <!-- Subdomains -->
+        <g class="ill-node ill-node--source n1">
+          <rect x="8" y="48" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 60)">
+            <circle cx="10" cy="10" r="8"/><ellipse cx="10" cy="10" rx="3.5" ry="8"/><path d="M2 10 H18"/>
           </g>
-          <marker id="net-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path class="net-arrow" d="M0,0 L10,5 L0,10 Z"/>
-          </marker>
-        </defs>
-
-        <!-- subdomains → APIs -->
-        <line class="net-link" x1="30" y1="60" x2="120" y2="90"/>
-        <line class="net-link d1" x1="60" y1="140" x2="120" y2="90"/>
-        <line class="net-link d2" x1="60" y1="140" x2="110" y2="200"/>
-        <line class="net-link d3" x1="25" y1="220" x2="110" y2="200"/>
-        <line class="net-link d4" x1="55" y1="300" x2="125" y2="320"/>
-        <line class="net-link d5" x1="30" y1="380" x2="125" y2="320"/>
-        <line class="net-link d1" x1="30" y1="380" x2="115" y2="420"/>
-        <line class="net-link d3" x1="70" y1="450" x2="115" y2="420"/>
-
-        <!-- APIs → cloud hosts / executives -->
-        <line class="net-link d2" x1="120" y1="90" x2="190" y2="130"/>
-        <line class="net-link d4" x1="120" y1="90" x2="240" y2="70"/>
-        <line class="net-link d1" x1="110" y1="200" x2="190" y2="130"/>
-        <line class="net-link d5" x1="110" y1="200" x2="180" y2="260"/>
-        <line class="net-link d3" x1="125" y1="320" x2="180" y2="260"/>
-        <line class="net-link" x1="125" y1="320" x2="195" y2="380"/>
-        <line class="net-link d2" x1="115" y1="420" x2="195" y2="380"/>
-        <line class="net-link d4" x1="115" y1="420" x2="235" y2="440"/>
-        <line class="net-link d1" x1="180" y1="260" x2="230" y2="250"/>
-
-        <!-- main lines → card -->
-        <line class="net-link net-main" x1="240" y1="70" x2="292" y2="215" marker-end="url(#net-arrowhead)"/>
-        <line class="net-link net-main d1" x1="190" y1="130" x2="292" y2="235" marker-end="url(#net-arrowhead)"/>
-        <line class="net-link net-main d2" x1="238" y1="250" x2="292" y2="250" marker-end="url(#net-arrowhead)"/>
-        <line class="net-link net-main d3" x1="195" y1="380" x2="292" y2="265" marker-end="url(#net-arrowhead)"/>
-        <line class="net-link net-main d4" x1="235" y1="440" x2="292" y2="285" marker-end="url(#net-arrowhead)"/>
-
-        <!-- subdomains (6 circles) -->
-        <circle class="net-node" cx="30" cy="60" r="5"/>
-        <circle class="net-node" cx="60" cy="140" r="5"/>
-        <circle class="net-node" cx="25" cy="220" r="5"/>
-        <circle class="net-node" cx="55" cy="300" r="5"/>
-        <circle class="net-node" cx="30" cy="380" r="5"/>
-        <circle class="net-node" cx="70" cy="450" r="5"/>
-
-        <!-- APIs (4 hexagons) -->
-        <use class="net-node" href="#net-hex" x="120" y="90"/>
-        <use class="net-node" href="#net-hex" x="110" y="200"/>
-        <use class="net-node" href="#net-hex" x="125" y="320"/>
-        <use class="net-node" href="#net-hex" x="115" y="420"/>
-
-        <!-- cloud hosts (3 squares) -->
-        <rect class="net-node" x="183" y="123" width="14" height="14" rx="2"/>
-        <rect class="net-node" x="173" y="253" width="14" height="14" rx="2"/>
-        <rect class="net-node" x="188" y="373" width="14" height="14" rx="2"/>
-
-        <!-- executives (2 people) -->
-        <use class="net-node" href="#net-person" x="240" y="70"/>
-        <use class="net-node" href="#net-person" x="235" y="440"/>
-
-        <!-- mobile app (phone outline) -->
-        <rect class="net-outline" x="222" y="237" width="16" height="26" rx="3"/>
-        <line class="net-outline" x1="228" y1="258" x2="232" y2="258"/>
+          <text x="52" y="74">Subdomains</text>
+        </g>
+        <!-- Live hosts & ports -->
+        <g class="ill-node ill-node--source n2">
+          <rect x="8" y="138" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 150)">
+            <rect x="3" y="3" width="14" height="6" rx="1.5"/><rect x="3" y="11" width="14" height="6" rx="1.5"/>
+            <circle class="dot" cx="6.5" cy="6" r="1"/><circle class="dot" cx="6.5" cy="14" r="1"/>
+          </g>
+          <text x="52" y="164">Live hosts &amp; ports</text>
+        </g>
+        <!-- APIs & surface -->
+        <g class="ill-node ill-node--source n3">
+          <rect x="8" y="228" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 240)">
+            <path d="M7 5.5 L2.5 10 L7 14.5"/><path d="M13 5.5 L17.5 10 L13 14.5"/><path d="M11.2 4 L8.8 16"/>
+          </g>
+          <text x="52" y="254">APIs &amp; surface</text>
+        </g>
+        <!-- Cloud infrastructure -->
+        <g class="ill-node ill-node--source n4">
+          <rect x="8" y="318" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 330)">
+            <path d="M6 15.5 H14.5 A3.5 3.5 0 0 0 14.9 8.52 A5 5 0 0 0 5.3 9.2 A3.2 3.2 0 0 0 6 15.5 Z"/>
+          </g>
+          <text x="52" y="344">Cloud infrastructure</text>
+        </g>
+        <!-- Mobile apps -->
+        <g class="ill-node ill-node--source n5">
+          <rect x="8" y="408" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(22 420)">
+            <rect x="5.5" y="2" width="9" height="16" rx="2"/><path d="M9 15 H11"/>
+          </g>
+          <text x="52" y="434">Mobile apps</text>
+        </g>
       </svg>
     </div>
 
@@ -610,18 +681,22 @@
         <!-- STEP 1 — TARGET -->
         <section class="panel active" id="panel-1" data-panel="1">
           <p class="eyebrow">RESURFACE</p>
-          <h1>What do you want to scan?</h1>
-          <p class="subtext">Enter a domain or describe the organisation.</p>
+          <h1>Let's map your attack surface</h1>
+          <p class="subtext">Not sure of the exact domain? Just describe your organisation in plain words — the name, what you do, where you're based — and we'll identify the right target for you.</p>
 
-          <label for="target-input" class="sr-only">Domain or organisation name</label>
+          <label for="target-input" class="sr-only">Your domain or any detail about your organisation</label>
           <input class="field" id="target-input" type="text" autocomplete="off" autocapitalize="off"
-                 spellcheck="false" maxlength="200" placeholder="domain.com or Organisation name">
+                 spellcheck="false" maxlength="200" placeholder="Enter your domain or any detail about your organisation"
+                 aria-describedby="target-hint">
 
-          <div class="chips" aria-label="Examples">
-            <button type="button" class="chip">gtbank.com</button>
-            <button type="button" class="chip">MTN Nigeria</button>
-            <button type="button" class="chip">Shell Nigeria</button>
-          </div>
+          <p class="input-reassure">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 20 L14.5 9.5"/><path d="M15 3 L15.9 5.6 L18.5 6.5 L15.9 7.4 L15 10 L14.1 7.4 L11.5 6.5 L14.1 5.6 Z"/>
+              <path d="M20 11 V13"/><path d="M19 12 H21"/><path d="M9 3.5 V5.5"/><path d="M8 4.5 H10"/>
+            </svg>
+            Type anything — we'll work out the domain.
+          </p>
+          <p class="input-hint" id="target-hint">A domain, organisation name, website, email domain, or a plain description all work.</p>
 
           <button type="button" class="btn" id="step1-btn">Continue →</button>
 
@@ -691,10 +766,78 @@
         </section>
 
       </div>
+      <p class="trust-strip">
+        <span>NDPA 2023 aligned</span><span class="trust-sep" aria-hidden="true">·</span>
+        <span>Results within 24 hours</span><span class="trust-sep" aria-hidden="true">·</span>
+        <span>No agents installed</span><span class="trust-sep" aria-hidden="true">·</span>
+        <span>Read-only external scan</span>
+      </p>
     </div>
 
-    <!-- Right illustration: mirror of the left (cloned in JS) -->
-    <div class="illustration mirrored" id="illustration-right" aria-hidden="true"></div>
+    <!-- Right illustration: what ReSurface surfaces (findings → card) -->
+    <div class="illustration" id="illustration-right" aria-hidden="true">
+      <svg viewBox="0 0 300 500" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <text class="ill-heading" x="288" y="28" text-anchor="end">WHAT WE SURFACE</text>
+
+        <g class="flows">
+          <path class="flow-base" d="M96 70 C48 70 44 250 8 250"/>
+          <path class="flow-base" d="M96 160 C48 160 44 250 8 250"/>
+          <path class="flow-base" d="M96 250 L8 250"/>
+          <path class="flow-base" d="M96 340 C48 340 44 250 8 250"/>
+          <path class="flow-base" d="M96 430 C48 430 44 250 8 250"/>
+          <path class="flow flow--finding" d="M96 70 C48 70 44 250 8 250"/>
+          <path class="flow flow--finding" d="M96 160 C48 160 44 250 8 250"/>
+          <path class="flow flow--finding" d="M96 250 L8 250"/>
+          <path class="flow flow--finding" d="M96 340 C48 340 44 250 8 250"/>
+          <path class="flow flow--finding" d="M96 430 C48 430 44 250 8 250"/>
+          <path class="flow-end--finding" d="M13 244 L5 250 L13 256"/>
+        </g>
+
+        <!-- Exposed admin panels -->
+        <g class="ill-node ill-node--finding n1">
+          <rect x="96" y="48" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(110 60)">
+            <rect x="2" y="3.5" width="16" height="13" rx="1.5"/><path d="M2 7 H18"/>
+            <path d="M10 9.5 V12.5"/><circle class="dot" cx="10" cy="14.4" r="0.8"/>
+          </g>
+          <text x="140" y="74">Exposed admin panels</text>
+        </g>
+        <!-- Leaked credentials -->
+        <g class="ill-node ill-node--finding n2">
+          <rect x="96" y="138" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(110 150)">
+            <circle cx="6.5" cy="10" r="3.5"/><path d="M10 10 H18"/><path d="M15 10 V13"/><path d="M17.5 10 V12.2"/>
+          </g>
+          <text x="140" y="164">Leaked credentials</text>
+        </g>
+        <!-- Impersonation domains -->
+        <g class="ill-node ill-node--finding n3">
+          <rect x="96" y="228" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(110 240)">
+            <circle cx="7.5" cy="10" r="5.5"/><circle cx="12.5" cy="10" r="5.5" stroke-dasharray="2 1.8"/>
+          </g>
+          <text x="140" y="254">Impersonation domains</text>
+        </g>
+        <!-- Executive exposure -->
+        <g class="ill-node ill-node--finding n4">
+          <rect x="96" y="318" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(110 330)">
+            <circle cx="8" cy="6.5" r="3"/><path d="M2.5 17 C2.5 13.8 5 11.5 8 11.5 S13.5 13.8 13.5 17"/>
+            <path d="M16.5 3.5 V8.5"/><circle class="dot" cx="16.5" cy="11" r="0.8"/>
+          </g>
+          <text x="140" y="344">Executive exposure</text>
+        </g>
+        <!-- Misconfigurations -->
+        <g class="ill-node ill-node--finding n5">
+          <rect x="96" y="408" width="196" height="44" rx="10"/>
+          <g class="ill-icon" transform="translate(110 420)">
+            <path d="M2.5 6 H17.5"/><path d="M2.5 14 H17.5"/>
+            <circle class="knob" cx="7" cy="6" r="2.2"/><circle class="knob" cx="13" cy="14" r="2.2"/>
+          </g>
+          <text x="140" y="434">Misconfigurations</text>
+        </g>
+      </svg>
+    </div>
 
   </div>
 </main>
@@ -706,7 +849,6 @@
   const API = '/.netlify/functions';
   const FREE_PROVIDERS = ['gmail', 'googlemail', 'yahoo', 'hotmail', 'outlook', 'icloud'];
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  const DOMAIN_RE = /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
   const RESEND_SECONDS = 30;
 
   let state = {
@@ -735,29 +877,7 @@
   let resendTimer = null;
   let requestInFlight = false;
 
-  // ── Mirror the left illustration into the right column ──
-  (function mirrorIllustration() {
-    const src = document.querySelector('#illustration-left svg');
-    if (!src) return;
-    const clone = src.cloneNode(true);
-    const defs = clone.querySelector('defs');
-    if (defs) defs.remove(); // shapes/marker still resolve to the left SVG's ids
-    $('illustration-right').appendChild(clone);
-  })();
-
   // ── Helpers ──
-  function isLikelyDomain(text) {
-    return text.includes('.') && !/\s/.test(text);
-  }
-
-  function normaliseDomain(text) {
-    return String(text).trim().toLowerCase()
-      .replace(/^[a-z]+:\/\//, '')
-      .replace(/^www\./, '')
-      .split(/[/?#:\s]/)[0]
-      .replace(/\.+$/, '');
-  }
-
   function isFreeProvider(email) {
     const host = email.split('@')[1] || '';
     return FREE_PROVIDERS.includes(host.split('.')[0]);
@@ -831,16 +951,16 @@
     resolveResult.appendChild(p);
   }
 
+  // Always shown — even a typed domain is interpreted, so the visitor
+  // confirms the exact target before we ask for their email.
   function renderResolved(domain) {
     resolveResult.className = 'show';
     resolveResult.innerHTML =
       '<div class="resolved-box">' +
-        '<p class="resolved-label">✓ Target identified</p>' +
+        '<p class="resolved-label">Based on what you told us, we\'ll scan:</p>' +
         '<p class="resolved-domain" id="resolved-domain"></p>' +
-        '<div class="btn-row">' +
-          '<button type="button" class="btn" id="confirm-domain-btn">Scan this domain</button>' +
-          '<button type="button" class="btn-ghost" id="change-domain-btn">Change</button>' +
-        '</div>' +
+        '<button type="button" class="btn" id="confirm-domain-btn">Scan this domain</button>' +
+        '<p class="resolved-change">Not right? <button type="button" class="link-btn" id="change-domain-btn">Change</button></p>' +
       '</div>';
     $('resolved-domain').textContent = domain;
     $('confirm-domain-btn').addEventListener('click', confirmDomain);
@@ -854,22 +974,14 @@
     state.resolvedDomain = '';
 
     if (!value) {
-      renderResolveError('Enter a domain or organisation name.');
+      renderResolveError('Enter your domain or any detail about your organisation.');
       targetInput.focus();
       return;
     }
 
-    if (isLikelyDomain(value)) {
-      const domain = normaliseDomain(value);
-      if (!DOMAIN_RE.test(domain)) {
-        renderResolveError("That doesn't look like a valid domain.");
-        return;
-      }
-      state.resolvedDomain = domain;
-      renderResolved(domain);
-      return;
-    }
-
+    // Every input goes through resolve-domain: it handles domains, URLs and
+    // email domains itself (no AI), rejects IPs, and only calls Groq for
+    // names and descriptions — one set of rules, in one place.
     setBusy(step1Btn, true, 'Resolving...');
     renderResolving();
     try {
@@ -878,7 +990,7 @@
         state.resolvedDomain = data.domain;
         renderResolved(data.domain);
       } else {
-        renderResolveError(data.error || "Couldn't identify a domain. Try entering it directly.");
+        renderResolveError(data.error || "We couldn't identify a specific organisation from that. Try adding the name, location, or sector — or enter the domain directly.");
       }
     } catch (_) {
       renderResolveError('Network error. Check your connection and try again.');
@@ -1107,12 +1219,6 @@
   }
 
   // ── Wiring ──
-  document.querySelectorAll('.chip').forEach((chip) => {
-    chip.addEventListener('click', () => {
-      targetInput.value = chip.textContent;
-      changeDomain();
-    });
-  });
   targetInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleStep1(); });
   targetInput.addEventListener('input', () => {
     if (state.resolvedDomain) { state.resolvedDomain = ''; resolveResult.className = ''; resolveResult.innerHTML = ''; }
