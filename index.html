@@ -71,6 +71,7 @@
   .hero {
     min-height: calc(100vh - 60px);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 40px 24px;
@@ -571,15 +572,122 @@
     border: 0;
   }
 
+  /* ── Context content around the card ─────── */
+  .intro {
+    max-width: 880px;
+    margin: 16px auto 40px;
+    text-align: center;
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--cyan);
+    margin: 0 0 16px;
+  }
+  .intro h1 {
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+  .lede {
+    max-width: 640px;
+    margin: 0 auto;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .why {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto 56px;
+  }
+  .why-item {
+    padding: 4px 28px;
+    text-align: center;
+  }
+  .why-item + .why-item { border-left: 1px solid var(--border); }
+  .why-lead {
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .why-text {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .deliverables {
+    width: 100%;
+    max-width: 960px;
+    margin: 88px auto 0;
+    text-align: center;
+  }
+  .deliverables h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text);
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .deliverables .lede { margin-bottom: 36px; }
+  .features {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    text-align: left;
+  }
+  .feature {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .feature-name {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--cyan);
+    margin: 0 0 8px;
+  }
+  .feature-desc {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .closing-line {
+    margin: 48px auto 8px;
+  }
+
   /* ── Responsive ─────────────────────────── */
   @media (max-width: 960px) {
     .hero-grid { grid-template-columns: 1fr; }
     .illustration { display: none; }
+    .why { grid-template-columns: 1fr; max-width: 520px; margin-bottom: 40px; }
+    .why-item { padding: 0; }
+    .why-item + .why-item { border-left: 0; border-top: 1px solid var(--border); margin-top: 16px; padding-top: 16px; }
+    .features { grid-template-columns: repeat(2, 1fr); }
+    .deliverables { margin-top: 64px; }
   }
   @media (max-width: 520px) {
     .site-header { padding: 0 16px; }
-    .hero { padding: 24px 16px; align-items: flex-start; }
+    .hero { padding: 24px 16px; justify-content: flex-start; }
     .card { padding: 28px 20px; }
+    .features { grid-template-columns: 1fr; }
     .otp-row { gap: 6px; }
     .otp-box { width: 42px; height: 52px; }
     .back-link .long { display: none; }
@@ -603,6 +711,27 @@
 </header>
 
 <main class="hero">
+  <div class="intro">
+    <p class="kicker">RESURFACE · EXTERNAL ATTACK SURFACE MANAGEMENT</p>
+    <h1>See your organisation the way an attacker does — in under two hours.</h1>
+    <p class="lede">ReSurface maps everything your organisation exposes to the internet — forgotten subdomains, unprotected APIs, leaked credentials, exposed executives, and cloud misconfigurations — then shows you exactly what an attacker would do with it. Board-ready. Mapped to NDPA, CBN, and POPIA. No agents, no installation.</p>
+  </div>
+
+  <div class="why">
+    <div class="why-item">
+      <p class="why-lead">You can't defend what you can't see.</p>
+      <p class="why-text">Most breaches start with something exposed on the public internet for months.</p>
+    </div>
+    <div class="why-item">
+      <p class="why-lead">Attackers already have this map.</p>
+      <p class="why-text">ReSurface shows you the same view they use — before they use it.</p>
+    </div>
+    <div class="why-item">
+      <p class="why-lead">Built for your regulators.</p>
+      <p class="why-text">Every finding maps to penalty exposure under your jurisdiction's framework, in local currency.</p>
+    </div>
+  </div>
+
   <div class="hero-grid">
 
     <!-- Left illustration: the organisation's exposed footprint, flowing into ReSurface -->
@@ -762,7 +891,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
             </div>
             <h2>Request received</h2>
-            <p class="subtext">Your scan of <span class="mono cyan" id="done-domain-2"></span> is queued. We'll email the findings to <span class="mono cyan" id="done-email"></span> within 24 hours.</p>
+            <p class="subtext">Your scan of <span class="mono cyan" id="done-domain-2"></span> is queued. We'll email the findings to <span class="mono cyan" id="done-email"></span> within hours.</p>
             <p class="status-line" role="status"><span class="status-dot" aria-hidden="true"></span>Queued</p>
           </div>
 
@@ -780,7 +909,7 @@
       </div>
       <p class="trust-strip">
         <span>NDPA 2023 aligned</span><span class="trust-sep" aria-hidden="true">·</span>
-        <span>Results within 24 hours</span><span class="trust-sep" aria-hidden="true">·</span>
+        <span>Results within hours</span><span class="trust-sep" aria-hidden="true">·</span>
         <span>No agents installed</span><span class="trust-sep" aria-hidden="true">·</span>
         <span>Read-only external scan</span>
       </p>
@@ -849,6 +978,37 @@
     </div>
 
   </div>
+
+  <section class="deliverables" aria-labelledby="deliverables-title">
+    <p class="kicker">WHAT YOU GET</p>
+    <h2 id="deliverables-title">A board-ready report — not a vulnerability dump</h2>
+    <p class="lede">You receive a report covering your full external attack surface, the realistic attack paths an adversary would take, your regulatory exposure with penalty estimates, and a prioritised remediation roadmap. Written for executives, mapped to your jurisdiction's frameworks.</p>
+    <div class="features">
+      <div class="feature">
+        <p class="feature-name">Attack surface map</p>
+        <p class="feature-desc">Every exposed asset, ranked by risk.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-name">Attack chains</p>
+        <p class="feature-desc">How findings combine into real threats.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-name">Regulatory exposure</p>
+        <p class="feature-desc">Penalties in local currency.</p>
+      </div>
+      <div class="feature">
+        <p class="feature-name">Remediation roadmap</p>
+        <p class="feature-desc">What to fix, in what order.</p>
+      </div>
+    </div>
+  </section>
+
+  <p class="trust-strip closing-line">
+    <span>Free</span><span class="trust-sep" aria-hidden="true">·</span>
+    <span>Read-only</span><span class="trust-sep" aria-hidden="true">·</span>
+    <span>No credentials required</span><span class="trust-sep" aria-hidden="true">·</span>
+    <span>We only look at what is already public</span>
+  </p>
 </main>
 
 <script>
