@@ -7,6 +7,8 @@
 //   bare domain              -> used directly
 //   anything else            -> org name or freeform description, via Groq
 
+const { isFreeProvider } = require("../lib/free-providers");
+
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "openai/gpt-oss-120b";
 const TIMEOUT_MS = 8000;
@@ -20,8 +22,6 @@ const DOMAIN_RE = /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{
 const IPV4_RE = /^\d{1,3}(?:\.\d{1,3}){3}$/;
 // IPv6 literal: 2–7 colons between hex groups, optionally bracketed with a port.
 const IPV6_RE = /^\[?(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}\]?(?::\d+)?$/i;
-// Same list the page uses for its work-email check.
-const FREE_PROVIDERS = ["gmail", "googlemail", "yahoo", "hotmail", "outlook", "icloud"];
 
 const ERR_IP = "Please enter a domain or organisation name. IP-based scans are available with a full engagement.";
 const ERR_UNKNOWN = "We couldn't identify a specific organisation from that. Try adding the name, location, or sector — or enter the domain directly.";
@@ -67,7 +67,7 @@ function resolveLocally(query) {
     const host = normaliseHost(email[1]);
     if (isIpAddress(host)) return { error: ERR_IP, status: 422 };
     if (!DOMAIN_RE.test(host)) return { error: ERR_INVALID, status: 422 };
-    if (FREE_PROVIDERS.includes(host.split(".")[0])) return { error: ERR_FREE_EMAIL, status: 422 };
+    if (isFreeProvider(host)) return { error: ERR_FREE_EMAIL, status: 422 };
     return { domain: host };
   }
 

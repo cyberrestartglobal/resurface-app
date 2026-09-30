@@ -594,7 +594,7 @@
 
 <header class="site-header">
   <a class="logo" href="https://cyberrestart.com">
-    <img src="assets/images/CyberRestartLogoWithoutSlogan.png" alt="CyberRestart" style="height:34px; width:auto;">
+    <img src="assets/images/logo-cropped.png" alt="CyberRestart" style="height:32px; width:auto;">
   </a>
   <a class="back-link" href="https://cyberrestart.com">← Back<span class="long"> to cyberrestart.com</span></a>
 </header>
@@ -847,7 +847,15 @@
   'use strict';
 
   const API = '/.netlify/functions';
-  const FREE_PROVIDERS = ['gmail', 'googlemail', 'yahoo', 'hotmail', 'outlook', 'icloud'];
+  // Mirror of netlify/lib/free-providers.js (server enforces it too) — update both together.
+  const FREE_PROVIDER_DOMAINS = new Set([
+    'gmail.com', 'googlemail.com', 'yahoo.com', 'ymail.com',
+    'hotmail.com', 'outlook.com', 'live.com', 'msn.com',
+    'icloud.com', 'me.com', 'mac.com', 'aol.com',
+    'protonmail.com', 'proton.me', 'pm.me', 'gmx.com', 'gmx.net',
+    'yandex.com', 'mail.com', 'zoho.com'
+  ]);
+  const FREE_PROVIDER_BRAND_RE = /^(?:gmail|googlemail|yahoo|hotmail|outlook|live|msn|aol|gmx|yandex)\.(?:[a-z]{2,3}|(?:co|com)\.[a-z]{2})$/;
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const RESEND_SECONDS = 30;
 
@@ -879,8 +887,8 @@
 
   // ── Helpers ──
   function isFreeProvider(email) {
-    const host = email.split('@')[1] || '';
-    return FREE_PROVIDERS.includes(host.split('.')[0]);
+    const host = (email.split('@')[1] || '').toLowerCase();
+    return FREE_PROVIDER_DOMAINS.has(host) || FREE_PROVIDER_BRAND_RE.test(host);
   }
 
   function showError(el, msg) {

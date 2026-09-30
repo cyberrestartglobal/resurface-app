@@ -8,10 +8,10 @@
 // Azure backend's otp_codes table replaces them (see PLATFORM_ARCHITECTURE.md).
 
 const crypto = require("crypto");
+const { isFreeProvider } = require("./free-providers");
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
-const FREE_PROVIDERS = new Set(["gmail", "googlemail", "yahoo", "hotmail", "outlook", "icloud"]);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const DOMAIN_RE = /^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
 
@@ -23,11 +23,6 @@ const json = (statusCode, body) => ({
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify(body),
 });
-
-function isFreeProvider(email) {
-  const host = email.split("@")[1] || "";
-  return FREE_PROVIDERS.has(host.split(".")[0]);
-}
 
 // Returns an error string, or "" if the pair is acceptable.
 function validateEmailAndDomain(email, domain) {
