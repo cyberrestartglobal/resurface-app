@@ -7,6 +7,7 @@
 //   bare domain              -> used directly
 //   anything else            -> org name or freeform description, via Groq
 
+const { withOriginCheck } = require("../lib/allowed-origins");
 const { isFreeProvider } = require("../lib/free-providers");
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -128,8 +129,8 @@ async function resolveWithGroq(query) {
   }
 }
 
-exports.handler = async (event) => {
-  if (event.httpMethod === "OPTIONS") return { statusCode: 204, body: "" };
+// Origin allowlist + CORS preflight are handled by withOriginCheck (lib/allowed-origins.js).
+exports.handler = withOriginCheck(async (event) => {
   if (event.httpMethod !== "POST") return fail(405, "Method not allowed");
 
   let query;
@@ -161,4 +162,4 @@ exports.handler = async (event) => {
     console.error("resolve-domain failed:", timedOut ? "timeout" : err.message);
     return fail(timedOut ? 504 : 502, "Domain lookup is unavailable right now. Try entering the domain directly.");
   }
-};
+});

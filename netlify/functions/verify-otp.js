@@ -1,6 +1,7 @@
 // POST {email, otp, domain, token} -> {verified: true, ref} | {verified: false, error}
 // On success, logs the scan request and notifies engage@cyberrestart.com.
 
+const { withOriginCheck } = require("../lib/allowed-origins");
 const crypto = require("crypto");
 const { MAX_ATTEMPTS, otpStore, json, checkToken, sendEmail } = require("../lib/otp");
 
@@ -15,8 +16,8 @@ function makeRef() {
 
 const reject = (statusCode = 400) => json(statusCode, { verified: false, error: "Invalid or expired code" });
 
-exports.handler = async (event) => {
-  if (event.httpMethod === "OPTIONS") return { statusCode: 204, body: "" };
+// Origin allowlist + CORS preflight are handled by withOriginCheck (lib/allowed-origins.js).
+exports.handler = withOriginCheck(async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Method not allowed" });
 
   let email, otp, domain, token;
@@ -80,4 +81,4 @@ exports.handler = async (event) => {
   }
 
   return json(200, { verified: true, ref });
-};
+});

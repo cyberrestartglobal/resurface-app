@@ -1,6 +1,7 @@
 // POST {email, domain} -> {sent: true, token}
 // Generates a 6-digit code, stores it, and emails it via Resend.
 
+const { withOriginCheck } = require("../lib/allowed-origins");
 const crypto = require("crypto");
 const {
   OTP_TTL_MS,
@@ -63,8 +64,8 @@ function otpEmailHtml(code, domain) {
 </body></html>`;
 }
 
-exports.handler = async (event) => {
-  if (event.httpMethod === "OPTIONS") return { statusCode: 204, body: "" };
+// Origin allowlist + CORS preflight are handled by withOriginCheck (lib/allowed-origins.js).
+exports.handler = withOriginCheck(async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Method not allowed" });
 
   let email, domain;
@@ -108,4 +109,4 @@ exports.handler = async (event) => {
   }
 
   return json(200, { sent: true, token: createToken({ email, domain, code, expires }) });
-};
+});
