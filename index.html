@@ -69,12 +69,10 @@
 
   /* ── Hero ───────────────────────────────── */
   .hero {
-    min-height: calc(100vh - 60px);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 40px 24px;
+    padding: 64px 24px 96px;
     background-color: var(--bg);
     background-image: radial-gradient(circle, #1e2d3d 1px, transparent 1px);
     background-size: 32px 32px;
@@ -575,7 +573,7 @@
   /* ── Context content around the card ─────── */
   .intro {
     max-width: 880px;
-    margin: 16px auto 40px;
+    margin: 0 auto 48px;
     text-align: center;
   }
   .kicker {
@@ -608,7 +606,7 @@
     grid-template-columns: repeat(3, 1fr);
     width: 100%;
     max-width: 960px;
-    margin: 0 auto 56px;
+    margin: 0 auto 72px;
   }
   .why-item {
     padding: 4px 28px;
@@ -631,7 +629,7 @@
   .deliverables {
     width: 100%;
     max-width: 960px;
-    margin: 88px auto 0;
+    margin: 96px auto 0;
     text-align: center;
   }
   .deliverables h2 {
@@ -685,7 +683,7 @@
   }
   @media (max-width: 520px) {
     .site-header { padding: 0 16px; }
-    .hero { padding: 24px 16px; justify-content: flex-start; }
+    .hero { padding: 40px 16px 64px; }
     .card { padding: 28px 20px; }
     .features { grid-template-columns: 1fr; }
     .otp-row { gap: 6px; }
@@ -1407,7 +1405,8 @@
 
   step3Btn.addEventListener('click', handleStep3);
 
-  targetInput.focus();
+  // preventScroll: focus the input without jumping past the hero on load.
+  targetInput.focus({ preventScroll: true });
 })();
 </script>
 </body>
